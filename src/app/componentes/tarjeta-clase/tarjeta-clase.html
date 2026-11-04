@@ -1,0 +1,20 @@
+<article class="tarjeta-clase">
+  <!-- los corchetes [src] y [alt] meten el valor de una expresion. clase() lleva parentesis porque el input es una senal -->
+  <img [src]="clase().imagen" [alt]="clase().nombre" />
+
+  <div class="tarjeta-clase__cuerpo">
+    <h3 class="tarjeta-clase__nombre">{{ clase().nombre }}</h3>
+    <p>{{ clase().descripcion }}</p>
+  </div>
+
+  <div class="tarjeta-clase__pie">
+    <!-- la clase de css cambia segun la categoria -->
+    <span [class]="'etiqueta etiqueta--' + clase().categoria">{{ clase().categoria }}</span>
+    <span class="etiqueta etiqueta--min">{{ clase().duracionMin }} min</span>
+
+    <!-- la etiqueta Larga solo sale si la clase dura 60 minutos o mas -->
+    @if (clase().duracionMin >= 60) {
+      <span class="etiqueta etiqueta--larga">Larga</span>
+    }
+  </div>
+</article>
