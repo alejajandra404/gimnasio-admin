@@ -1,4 +1,8 @@
-<article class="tarjeta-clase">
+<article 
+  class="tarjeta-clase"
+  [class.tarjeta-clase--activa] = "activa()"
+  (click)="seleccion.emit(clase())"
+>
   <!-- los corchetes [src] y [alt] meten el valor de una expresion. clase() lleva parentesis porque el input es una senal -->
   <img [src]="clase().imagen" [alt]="clase().nombre" />
 
@@ -14,7 +18,7 @@
 
     <!-- la etiqueta Larga solo sale si la clase dura 60 minutos o mas -->
     @if (clase().duracionMin >= 60) {
-      <span class="etiqueta etiqueta--larga">Larga</span>
+    <span class="etiqueta etiqueta--larga">Larga</span>
     }
   </div>
 </article>

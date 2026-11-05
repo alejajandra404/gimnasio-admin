@@ -1,16 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import type { Clase } from './modelos/clase';
 import { CLASES_LOCALES } from './datos/clases-locales';
 import { TarjetaClase } from './componentes/tarjeta-clase/tarjeta-clase';
+import { Catalogo } from '../servicios/catalogo';
+import { FiltroCategoria } from './componentes/filtro-categoria/filtro-categoria';
 
 @Component({
   // para usar <app-tarjeta-clase> en el html, el componente tiene que estar aqui en imports
-  imports: [TarjetaClase],
+  imports: [TarjetaClase, FiltroCategoria],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
 })
 export class App {
+
+  protected readonly catalogo = inject(Catalogo);
+
   // las clases que se muestran. por ahora salen del archivo local
   protected clases: Clase[] = CLASES_LOCALES;
 

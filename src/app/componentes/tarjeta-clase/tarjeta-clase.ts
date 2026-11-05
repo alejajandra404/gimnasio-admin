@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import type { Clase } from '../../modelos/clase';
 
 @Component({
@@ -10,4 +10,8 @@ import type { Clase } from '../../modelos/clase';
 export class TarjetaClase {
   // la clase la manda el componente de afuera. required quiere decir que es obligatorio mandarla
   readonly clase = input.required<Clase>();
+
+  readonly activa = input(false);
+
+  readonly seleccion = output<Clase>();
 }
