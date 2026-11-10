@@ -37,3 +37,36 @@ El `track` sirve para que Angular reconozca cuál tarjeta es cuál cuando la lis
 ![Error NG5002](evidencias/04-error-ng5002.png)
 
 Después de capturar los errores, regresé el código a como estaba.
+
+---
+
+# Práctica 20 – El panel del gimnasio: signals, un servicio y el filtro
+
+## Ejercicio 1: el servicio del catálogo
+
+### ¿Qué diferencia hay entre un signal y un computed, y cuál se parece a useState y cuál a useMemo?
+
+Un `signal` es un valor que se guarda y que se puede cambiar con `set` o `update`, por ejemplo la categoría elegida. Para leerlo hay que llamarlo con paréntesis, como `categoria()`. Un `computed` es un valor que se calcula a partir de otros signals y que no se cambia directamente, solo se lee. Por ejemplo `visibles` depende de la categoría, y `minutosTotales` depende de `visibles`, así que cuando se cambia la categoría los dos se actualizan solos.
+
+El `signal` se parece a `useState`, porque guarda un valor que cambia. El `computed` se parece a `useMemo`, porque es un valor calculado que guarda su resultado y solo lo vuelve a calcular cuando cambia algo de lo que usa. 
+
+## Ejercicio 2: el filtro y el detalle
+
+Con el filtro en Cardio salen 4 clases, 175 minutos a la semana y 1 clase de una hora o más:
+
+![Filtro en Cardio](evidencias/05-filtro-cardio.png)
+
+Con una clase elegida (Boxeo recreativo), la tarjeta se resalta y su detalle sale en el panel de la derecha:
+
+![Clase elegida con su detalle](evidencias/06-clase-elegida.png)
+
+### ¿Qué pasa si el filtro hace new Catalogo() en lugar de inject(Catalogo)?
+
+Lo probé cambiando esa línea del filtro. Al pulsar Cardio, el botón de Cardio si se marcó como activo, pero las tarjetas del tablero no  cambiaron y los números del resumen tampoco. Pasa porque con `new Catalogo()` el filtro crea su propio catálogo, otra copia aparte, y cambia la categoría de esa copia. El tablero sigue leyendo la otra copia. Con `inject(Catalogo)` los dos componentes reciben la misma copia, y por eso lo que se hace el filtro si lo ve el tablero.
+
+### Provocar y capturar el aviso NG8109
+
+Le quité los paréntesis a `catalogo.minutosTotales()` en el HTML, o sea escribí `{{ catalogo.minutosTotales }}`. En la terminal de `ng serve` salió el aviso `NG8109: minutosTotales is a function and should be invoked: minutosTotales()`. Es un aviso y no un error, así que la página siguió funcionando. Lo que sí cambió fue lo que se veía en la tarjeta de minutos porque en lugar del número salió `[Computed (minutosTotales): 380]`. Sin paréntesis no se esta leyendo el valor del `computed`, sino la función misma (con el 380 adentro).
+
+![Aviso NG8109](evidencias/07-aviso-ng8109.png)
+
