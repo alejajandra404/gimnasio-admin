@@ -1,0 +1,79 @@
+<a routerLink="/clases"><- Cancelar</a>
+
+<!-- [formGroup] conecta el form con el del ts. novalidate apaga los mensajes propios del navegador -->
+<form class="tarjeta formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+  <div class="campo">
+    <label for="nombre">Nombre</label>
+    <!-- formControlName conecta el input con el campo del mismo nombre en el ts -->
+    <input id="nombre" formControlName="nombre" />
+    <!-- touched = el usuario ya entro al campo y se salio. asi el mensaje no sale desde que abre la pagina -->
+    @if (f.nombre.touched && f.nombre.hasError('required')) {
+      <span class="error">El nombre es obligatorio.</span>
+    }
+    @if (f.nombre.touched && f.nombre.hasError('maxlength')) {
+      <span class="error">El nombre es de máximo 80 caracteres.</span>
+    }
+  </div>
+
+  <div class="fila">
+
+    <div class="campo">
+      <label for="categoria">Categoría</label>
+      <select id="categoria" formControlName="categoria">
+        @for (c of categorias; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="duracionMin">Duración (minutos)</label>
+      <input id="duracionMin" type="number" formControlName="duracionMin" />
+      @if (f.duracionMin.touched && f.duracionMin.hasError('required')) {
+        <span class="error">Escribe la duración.</span>
+      }
+      @if (f.duracionMin.touched && f.duracionMin.hasError('min')) {
+        <span class="error">La duración mínima es de 10 minutos.</span>
+      }
+      <!-- 'multiploDe' es el nombre del error que regresa nuestro validador propio -->
+      @if (f.duracionMin.touched && f.duracionMin.hasError('multiploDe')) {
+        <span class="error">La duración va en bloques de 5 minutos (45, 50, 55…).</span>
+      }
+    </div>
+  </div>
+
+  <div class="campo">
+    <label for="descripcion">Descripción</label>
+    <textarea id="descripcion" rows="3" formControlName="descripcion"></textarea>
+    <!-- el valor del campo tambien se puede leer mientras se escribe -->
+    <span class="contador">{{ f.descripcion.value.length }} / 255</span>
+    @if (f.descripcion.touched && f.descripcion.hasError('required')) {
+      <span class="error">La descripción es obligatoria.</span>
+    }
+  </div>
+
+  <div class="campo">
+    <label for="imagen">Imagen</label>
+    <select id="imagen" formControlName="imagen">
+      @for (img of imagenes; track img) {
+        <option [value]="img">{{ img }}</option>
+      }
+    </select>
+    <!-- la imagen sale de la api: http://localhost:3000 + /img/clase-01.jpg -->
+    <img class="vista-previa" [src]="apiUrl + f.imagen.value" alt="" />
+  </div>
+
+  <div class="acciones">
+    <button class="boton" type="submit">Guardar</button>
+  </div>
+
+</form>
+
+<!-- este aviso solo sale cuando lista tiene algo, o sea cuando se guardo con el formulario valido -->
+@if (lista(); as datos) {
+  <div class="aviso" style="margin-top: 1rem;">
+    El formulario es válido. Esto se mandaría a la API:
+    <!-- el pipe json convierte el objeto en texto para poder verlo -->
+    <pre>{{ datos | json }}</pre>
+  </div>
+}

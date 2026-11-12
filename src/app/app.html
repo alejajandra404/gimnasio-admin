@@ -4,63 +4,16 @@
       <img src="/logo.svg" alt="" /> Gimnasio Titanes
       <span class="barra__etiqueta">Admin</span>
     </span>
+    <!-- routerLink cambia de pagina sin recargar. routerLinkActive le pone la clase al enlace de la pagina en la que estoy -->
+    <nav class="barra__enlaces">
+      <a class="barra__enlace" routerLink="/clases" routerLinkActive="barra__enlace--activo">Clases</a>
+      <a class="barra__enlace" routerLink="/horarios" routerLinkActive="barra__enlace--activo">Horarios</a>
+      <a class="barra__enlace" routerLink="/miembros" routerLinkActive="barra__enlace--activo">Miembros</a>
+    </nav>
   </div>
 </header>
 
 <main class="pagina">
-  <div class="encabezado">
-    <h1>Catálogo de clases</h1>
-    <p>Estos datos son del archivo local</p>
-  </div>
-
-  <!-- (click) es un evento: cuando se da clic al boton se ejecuta el metodo de app.ts 
-  <div class="acciones">
-    <button class="boton boton--secundario" (click)="vaciar()">Vaciar</button>
-    <button class="boton" (click)="restaurar()">Restaurar</button>
-  </div> -->
-
-  <!-- las llaves dobles muestran el valor de una propiedad o de un getter de app.ts -->
-  <section class="resumen">
-    <div class="resumen__dato">
-      <span class="resumen__numero">{{ catalogo.visibles().length }}</span>
-      <span class="resumen__texto">clases en el catálogo</span>
-    </div>
-    <div class="resumen__dato">
-      <span class="resumen__numero">{{ catalogo.minutosTotales() }}</span>
-      <span class="resumen__texto">minutos a la semana</span>
-    </div>
-    <div class="resumen__dato">
-      <span class="resumen__numero">{{ catalogo.clasesLargas() }}</span>
-      <span class="resumen__texto">clases de una hora o más</span>
-    </div>
-  </section>
-
-  <app-filtro-categoria></app-filtro-categoria>
-
-
-  <div class="tablero">
-    <div class="rejilla">
-      <!-- @for repite la tarjeta por cada clase. track le dice a angular como reconocer cada una (por su id) -->
-      @for (clase of catalogo.visibles(); track clase.id) {
-      <app-tarjeta-clase
-      [clase]="clase"
-      [activa]="clase.id === catalogo.seleccionada()?.id"
-      (seleccion)="catalogo.seleccionar($event)"
-      />
-      } @empty {
-      <!-- @empty sale solo cuando la lista no tiene ningun elemento -->
-      <p class="vacio">No hay clases disponibles.</p>
-      }
-    </div>
-
-    <aside class="tarjeta lateral">
-      @if(catalogo.seleccionada(); as c) {
-        <img [src]="c.imagen" [alt]="c.nombre">
-        <h2>{{c.nombre}}</h2>
-        <p>{{c.descripcion}}</p>
-      }
-    </aside>
-
-  </div>
-
+  <!-- aqui adentro se pinta la pagina que toque segun la direccion -->
+  <router-outlet />
 </main>
