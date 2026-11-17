@@ -52,7 +52,13 @@ export class Catalogo {
     seleccionar(clase: Clase): void {
         // set reemplaza el valor de la variable
         // update hace lo mismo pero tiene acceso al valor actual de la variable
-        this.seleccionada.update((actual) => (actual?.id === clase.id ? null : clase)); 
+        this.seleccionada.update((actual) => (actual?.id === clase.id ? null : clase));
+    }
+
+    // vuelve a pedir GET /clases, por ejemplo despues de crear una clase, para que el catalogo salga actualizado
+    recargar(): void {
+        this.seleccionada.set(null);
+        this.recurso.reload();
     }
 
 }    

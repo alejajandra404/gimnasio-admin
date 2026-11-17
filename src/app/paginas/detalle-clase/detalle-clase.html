@@ -1,0 +1,34 @@
+<a routerLink="/clases"><- Regresar</a>
+
+@if (error(); as e) {
+  <div class="aviso aviso--error">{{ e }}</div>
+} @else if (clase(); as c) {
+  <div class="tarjeta">
+    <img class="vista-previa" [src]="apiUrl + c.imagen" [alt]="c.nombre" />
+    <h1>{{ c.nombre }}</h1>
+    <p>{{ c.descripcion }}</p>
+    <span [class]="'etiqueta etiqueta--' + c.categoria">{{ c.categoria }}</span>
+    <span class="etiqueta etiqueta--min">{{ c.duracionMin }} min</span>
+
+    <h2>Horarios</h2>
+    <!-- un renglon por cada horario de la clase -->
+    <ul class="horarios">
+      @for (h of c.horarios; track h.id) {
+        <li class="horario">
+          <span class="horario__cuando">{{ h.dia }} {{ h.horaInicio }}</span>
+          <!-- si ya no hay lugares sale la etiqueta roja de lleno -->
+          @if (h.disponibles === 0) {
+            <span class="etiqueta etiqueta--lleno">Lleno</span>
+          } @else {
+            <span class="etiqueta etiqueta--min">{{ h.disponibles }} de {{ h.cupoMaximo }} lugares</span>
+          }
+          <span class="horario__quien">{{ h.entrenador }}</span>
+        </li>
+      } @empty {
+        <p class="vacio">Esta clase todavía no tiene horarios.</p>
+      }
+    </ul>
+  </div>
+} @else {
+  <p>Cargando...</p>
+}

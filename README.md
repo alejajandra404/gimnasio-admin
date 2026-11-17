@@ -134,3 +134,83 @@ Ningún componente se enteró porque lo que ellos leen del servicio se quedó ig
 
 Porque en el backend `GET /clases` es público. Así que la API contesta aunque la petición no lleve token.
 
+---
+
+# Práctica 22 – El panel del gimnasio: crear y editar clases
+
+## Ejercicio 1: guardar con POST
+
+Quité los Validators de nombre y duración, y con el nombre vacío y 5 minutos el POST sí salió. El servidor respondió 400 y arriba del formulario salieron sus mensajes:
+
+![Mensajes del servidor sin Validators](evidencias/practica-22/13-mensajes-servidor-sin-validators.png)
+
+Con `@Roles(Rol.admin)` de vuelta en el backend, y todavía sin login, el POST responde 401:
+
+![POST con 401 antes del login](evidencias/practica-22/14-post-401-antes-del-login.png)
+
+### Si el formulario ya valida, ¿por qué también valida el servidor?
+
+Porque lo que se valida en el navegador se puede saltar. Cualquiera puede cambiar el código del navegador o mandar la petición desde otro lado sin usar mi formulario. La validación del formulario es para que el usuario vea el error rápido, sin esperar a la API, pero la que de verdad protege los datos es la del servidor.
+
+### ¿Por qué httpResource para leer y HttpClient para crear, editar y eliminar?
+
+`httpResource` hace la petición solo, en cuanto se crea, y me da el resultado, el «cargando» y el error ya como signals. Crear, editar y eliminar no deben pasar solos, tienen que pasar una vez y solo cuando le doy clic a Guardar. Con `HttpClient` yo decido cuándo sale la petición (con el `subscribe()`) y qué hacer cuando termina.
+
+### ¿Qué pasa si se olvida el subscribe()?
+
+La petición nunca sale. `this.http.post(...)` solo prepara la petición, pero no la manda hasta que alguien le hace `subscribe()`.
+
+## Ejercicio 2: el login, los interceptores y el guardia
+
+Con la cuenta de miembro (`karla@itson.mx`) el login no deja entrar al panel:
+
+![Login rechazando a la cuenta de miembro](evidencias/practica-22/15-login-rechaza-miembro.png)
+
+Ya con la sesión del admin, el POST sale con el encabezado `Authorization` y la API responde 201:
+
+![POST 201 con el encabezado Authorization](evidencias/practica-22/16-post-201-con-authorization.png)
+
+### ¿A qué pieza de React corresponden las rutas hijas (children), el interceptor y el guardia?
+
+- Las rutas hijas (`children`) son las rutas anidadas de React Router dentro de una ruta con `<Layout>`.
+- El interceptor es como el interceptor de Axios (`api.interceptors.request.use` y `api.interceptors.response.use`).
+- El guardia es como el componente `<RutaProtegida>`: si no hay sesión de admin manda al login (como `<Navigate to="/login" />`) y si sí la hay deja pasar.
+
+### ¿Cuándo se ejecuta el guardia y por qué salir() tiene que navegar al login?
+
+El guardia se ejecuta cuando intento entrar a la ruta del panel, por ejemplo cuando escribo `/clases` en la barra, recargo la página o el login me manda a `/clases`.
+
+Por eso `salir()` tiene que navegar al login: si solo borrara la sesión, me quedaría en la página donde estaba porque nadie vuelve a revisar al guardia. Al navegar al login si salgo del panel, y si después intento regresar a `/clases`, el guardia ya no me deja y me manda al login.
+
+## Ejercicio 3: editar, eliminar y la guarda de salida
+
+Al editar una clase y guardar, sale un PATCH a `/clases/1` con 200 y el catálogo se actualiza:
+
+![Edición con su PATCH](evidencias/practica-22/17-edicion-con-patch.png)
+
+Al eliminar una clase (después de confirmar), sale un DELETE con 200 y el catálogo queda con una clase menos:
+
+![DELETE con su 200](evidencias/practica-22/18-delete-con-200.png)
+
+Si escribo algo en el formulario y trato de salir, la guarda de salida pide confirmación:
+
+![Confirmación de la guarda de salida](evidencias/practica-22/19-confirmacion-guarda-salida.png)
+
+### ¿Cómo decide un mismo formulario, con dos rutas, si manda POST o PATCH?
+
+Por el `id`. Las dos rutas (`clases/nueva` y `clases/:id/editar`) cargan el mismo `FormularioClase`, pero solo la de editar trae un `:id` en la dirección, y ese id le llega al formulario como `input`. En `guardar()` reviso y si hay `id` uso `actualizar()` (PATCH), y si no hay uso `crear()` (POST).
+
+### ¿Por qué el estado del formulario no se puede observar con un computed()?
+
+Porque un `computed()` solo se vuelve a calcular cuando cambia un signal que lee, y el estado del formulario reactivo no es un signal. Entonces si meto `form.dirty` en un `computed()`, no se entera cuando escribo en un campo.
+
+### ¿Qué diferencia hay entre canActivate y canDeactivate, y qué casos no cubre la guarda de salida?
+
+`canActivate` se revisa antes de **entrar** a una ruta, como `soloAdmin`, que no deja entrar al panel sin sesión de admin. `canDeactivate` se revisa antes de **salir** de una ruta, como `cambiosSinGuardar`.
+
+La guarda de salida solo funciona cuando me muevo con el router de Angular (el «Cancelar», los enlaces de la barra). Lo probé y no cubre cuando recargo la página ni cuando cierro la pestaña.
+
+### ¿Por qué la ruta de crear va antes que la del id?
+
+Porque el router revisa las rutas en orden y `clases/:id` le queda a cualquier cosa que venga después de `clases/`, incluida la palabra «nueva». Lo probé poniendo la ruta del detalle arriba: al darle «+ Nueva clase» me abrió la página de detalle en lugar del formulario, pidió `GET /clases/NaN` (porque tomó «nueva» como si fuera el id) y el servidor respondió 400 con «Validation failed (numeric string is expected)». Con `clases/nueva` arriba, esa dirección exacta se encuentra primero y ya no se confunde con un id.
+

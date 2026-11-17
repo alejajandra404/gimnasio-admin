@@ -60,6 +60,10 @@
         <img [src]="apiUrl + c.imagen" [alt]="c.nombre">
         <h2>{{c.nombre}}</h2>
         <p>{{c.descripcion}}</p>
+        <!-- lleva a /clases/3/editar con el id de la clase elegida -->
+        <a class="boton" [routerLink]="['/clases', c.id, 'editar']">Editar</a>
+        <!-- lleva a /clases/3, la pagina con los horarios de la clase -->
+        <a class="boton boton--secundario" [routerLink]="['/clases', c.id]">Ver horarios</a>
       }
     </aside>
 

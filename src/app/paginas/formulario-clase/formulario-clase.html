@@ -1,5 +1,14 @@
 <a routerLink="/clases"><- Cancelar</a>
 
+<!-- aqui salen los errores que regresa la api, uno por renglon -->
+@if (erroresServidor().length) {
+  <div class="aviso aviso--error">
+    @for (e of erroresServidor(); track e) {
+      <div>{{ e }}</div>
+    }
+  </div>
+}
+
 <!-- [formGroup] conecta el form con el del ts. novalidate apaga los mensajes propios del navegador -->
 <form class="tarjeta formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
   <div class="campo">
@@ -64,16 +73,12 @@
   </div>
 
   <div class="acciones">
-    <button class="boton" type="submit">Guardar</button>
+    <!-- mientras guarda, el boton se apaga y cambia de texto para que no se le de clic dos veces -->
+    <button class="boton" type="submit" [disabled]="guardando()">{{ guardando() ? 'Guardando...' : 'Guardar' }}</button>
+    <!-- eliminar solo sale al editar (cuando hay id). type="button" para que no mande el formulario -->
+    @if (id()) {
+      <button class="boton boton--peligro" type="button" [disabled]="guardando()" (click)="eliminar()">Eliminar</button>
+    }
   </div>
 
 </form>
-
-<!-- este aviso solo sale cuando lista tiene algo, o sea cuando se guardo con el formulario valido -->
-@if (lista(); as datos) {
-  <div class="aviso" style="margin-top: 1rem;">
-    El formulario es válido. Esto se mandaría a la API:
-    <!-- el pipe json convierte el objeto en texto para poder verlo -->
-    <pre>{{ datos | json }}</pre>
-  </div>
-}
