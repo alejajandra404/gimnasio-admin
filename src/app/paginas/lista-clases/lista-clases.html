@@ -29,28 +29,39 @@
 
 <app-filtro-categoria></app-filtro-categoria>
 
-
-<div class="tablero">
+<!-- tres estados: si fallo la api sale el error, si todavia esta cargando salen los esqueletos, y si ya llego sale el tablero -->
+@if (catalogo.error(); as error) {
+  <div class="aviso aviso--error">{{ error }}</div>
+} @else if (catalogo.cargando()) {
+  <!-- los esqueletos son cajas grises que ocupan el lugar de las tarjetas mientras llegan los datos -->
   <div class="rejilla">
-    <!-- @for repite la tarjeta por cada clase. track le dice a angular como reconocer cada una (por su id) -->
-    @for (clase of catalogo.visibles(); track clase.id) {
-    <app-tarjeta-clase
-    [clase]="clase"
-    [activa]="clase.id === catalogo.seleccionada()?.id"
-    (seleccion)="catalogo.seleccionar($event)"
-    />
-    } @empty {
-    <!-- @empty sale solo cuando la lista no tiene ningun elemento -->
-    <p class="vacio">No hay clases disponibles.</p>
-    }
+    <div class="esqueleto"></div>
+    <div class="esqueleto"></div>
+    <div class="esqueleto"></div>
   </div>
+} @else {
+  <div class="tablero">
+    <div class="rejilla">
+      <!-- @for repite la tarjeta por cada clase. track le dice a angular como reconocer cada una (por su id) -->
+      @for (clase of catalogo.visibles(); track clase.id) {
+      <app-tarjeta-clase
+      [clase]="clase"
+      [activa]="clase.id === catalogo.seleccionada()?.id"
+      (seleccion)="catalogo.seleccionar($event)"
+      />
+      } @empty {
+      <!-- @empty sale solo cuando la lista no tiene ningun elemento -->
+      <p class="vacio">No hay clases disponibles.</p>
+      }
+    </div>
 
-  <aside class="tarjeta lateral">
-    @if(catalogo.seleccionada(); as c) {
-      <img [src]="c.imagen" [alt]="c.nombre">
-      <h2>{{c.nombre}}</h2>
-      <p>{{c.descripcion}}</p>
-    }
-  </aside>
+    <aside class="tarjeta lateral">
+      @if(catalogo.seleccionada(); as c) {
+        <img [src]="apiUrl + c.imagen" [alt]="c.nombre">
+        <h2>{{c.nombre}}</h2>
+        <p>{{c.descripcion}}</p>
+      }
+    </aside>
 
-</div>
+  </div>
+}

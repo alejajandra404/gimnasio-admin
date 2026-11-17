@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import type { Clase } from '../../modelos/clase';
+import { API_URL } from '../../../config';
 
 @Component({
   imports: [],
@@ -14,4 +15,7 @@ export class TarjetaClase {
   readonly activa = input(false);
 
   readonly seleccion = output<Clase>();
+
+  // la direccion de la api, para pegarla antes de la ruta de la imagen
+  protected readonly apiUrl = API_URL;
 }

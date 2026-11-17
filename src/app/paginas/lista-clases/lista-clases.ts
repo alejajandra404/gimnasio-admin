@@ -3,6 +3,7 @@ import { Catalogo } from '../../../servicios/catalogo';
 import { TarjetaClase } from '../../componentes/tarjeta-clase/tarjeta-clase';
 import { FiltroCategoria } from '../../componentes/filtro-categoria/filtro-categoria';
 import { RouterLink } from '@angular/router';
+import { API_URL } from '../../../config';
 
 @Component({
   // el tablero se mudo aqui desde app, por eso esta pagina ahora importa la tarjeta y el filtro
@@ -15,4 +16,6 @@ import { RouterLink } from '@angular/router';
 export class ListaClases {
   // la pagina lee los datos del mismo servicio de antes
   protected readonly catalogo = inject(Catalogo);
+  // la imagen del panel lateral tambien viene de la api
+  protected readonly apiUrl = API_URL;
 }

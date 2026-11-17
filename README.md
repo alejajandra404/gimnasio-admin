@@ -118,3 +118,19 @@ Cuando el valor es válido regresa `null`, o sea no hay valor. Cuando no es vál
 
 `hasError('multiploDe')` revisa si en los errores del campo está ese nombre. Si el validador regresó el objeto, da `true` y sale el mensaje «La duración va en bloques de 5 minutos», si regresó `null`, da `false` y no sale nada.
 
+## Ejercicio 3: el catálogo desde la API
+
+El catálogo ya pide las clases a la API. En la pestaña Red sale `GET /clases` con 200, y las imágenes también vienen de la API:
+
+![Catálogo con la pestaña Red mostrando GET /clases](evidencias/practica-21/12-catalogo-get-clases.png)
+
+### ¿Qué cambió en el servicio del catálogo y por qué ningún componente se enteró?
+
+Cambió de dónde salen las clases. Antes `clases` era un `signal` con `CLASES_LOCALES`, y ahora es un `computed` que saca los datos de un `httpResource` que pide `GET /clases`.
+
+Ningún componente se enteró porque lo que ellos leen del servicio se quedó igual, tienen el mismo nombre y regresan lo mismo, así que al filtro y a la tarjeta no les importa si las clases vienen de un archivo o de la API.
+
+### ¿Por qué no hizo falta iniciar sesión para leer el catálogo?
+
+Porque en el backend `GET /clases` es público. Así que la API contesta aunque la petición no lleve token.
+

@@ -4,7 +4,8 @@
   (click)="seleccion.emit(clase())"
 >
   <!-- los corchetes [src] y [alt] meten el valor de una expresion. clase() lleva parentesis porque el input es una senal -->
-  <img [src]="clase().imagen" [alt]="clase().nombre" />
+  <!-- la imagen ya no esta en public/img, la da la api: apiUrl + /img/clase-01.jpg -->
+  <img [src]="apiUrl + clase().imagen" [alt]="clase().nombre" />
 
   <div class="tarjeta-clase__cuerpo">
     <h3 class="tarjeta-clase__nombre">{{ clase().nombre }}</h3>
