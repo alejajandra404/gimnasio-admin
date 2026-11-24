@@ -1,26 +1,47 @@
-import { computed, Service, signal } from '@angular/core'
-import { httpResource } from '@angular/common/http';
-import { Categoria, Clase, Sobre } from '../app/modelos/clase';
-import { API_URL } from '../config';
+import { computed, inject, Service, signal } from '@angular/core'
+import { toSignal } from '@angular/core/rxjs-interop';
+import { BehaviorSubject, catchError, map, of, startWith, switchMap } from 'rxjs';
+import { Categoria, Clase } from '../app/modelos/clase';
 import { mensajeDeApi } from './errores';
+import { ClasesApi } from './clases-api';
 
 @Service()
 export class Catalogo {
-    // httpResource pide GET /clases solito al arrancar. la api regresa { data, meta }, por eso es Sobre<Clase[]>
-    private readonly recurso = httpResource<Sobre<Clase[]>>(() => `${API_URL}/clases`);
+    private readonly api = inject(ClasesApi);
 
-    // antes era un signal con las clases locales, ahora sale de lo que regreso la api (o [] si todavia no llega)
-    // si la peticion fallo, leer value() truena asi que se pregunta con hasValue()
-    private readonly clases = computed(() => this.recurso.hasValue() ? this.recurso.value().data : []);
+    // el texto que se esta buscando. se guarda para que la caja no se borre al regresar a la pagina
+    private readonly _texto = signal('');
+    readonly texto = this._texto.asReadonly();
+
+    // aqui se van metiendo los textos a buscar. empieza con '' para que al arrancar pida todas las clases
+    private readonly busquedas = new BehaviorSubject<string>('');
+
+    // el tubo: cada texto nuevo se convierte en una peticion GET /clases?q=...
+    // switchMap: si llega un texto nuevo y la peticion de antes no ha terminado, la cancela y se queda con la nueva
+    // startWith: antes de que llegue la respuesta avisa que esta cargando
+    // catchError: si la api falla, en vez de tronar regresa el mensaje de error y la lista vacia
+    // toSignal: convierte todo eso en un signal para poder leerlo como los demas
+    private readonly resultado = toSignal(
+        this.busquedas.pipe(
+            switchMap((q) =>
+                this.api.listar(q).pipe(
+                    map((clases): Resultado => ({ cargando: false, error: null, clases })),
+                    catchError((e) => of<Resultado>({ cargando: false, error: mensajeDeApi(e), clases: [] })),
+                    startWith<Resultado>({ cargando: true, error: null, clases: [] })
+                )
+            )
+        ),
+        { initialValue: { cargando: true, error: null, clases: [] } }
+    );
+
+    // antes salian del httpResource, ahora salen del resultado del tubo
+    private readonly clases = computed(() => this.resultado().clases);
 
     // true mientras la peticion no ha terminado
-    readonly cargando = computed(() => this.recurso.isLoading());
+    readonly cargando = computed(() => this.resultado().cargando);
 
     // si la peticion fallo, aqui queda la frase para mostrar. si no, null
-    readonly error = computed(() => {
-        const e = this.recurso.error();
-        return e ? mensajeDeApi(e) : null;
-    });
+    readonly error = computed(() => this.resultado().error);
 
     readonly categoria = signal<Categoria | 'todas'>("todas");
 
@@ -55,10 +76,24 @@ export class Catalogo {
         this.seleccionada.update((actual) => (actual?.id === clase.id ? null : clase));
     }
 
-    // vuelve a pedir GET /clases, por ejemplo despues de crear una clase, para que el catalogo salga actualizado
-    recargar(): void {
+    // la caja de busqueda llama esto con el texto ya limpio. se mete al tubo y sale la peticion
+    buscar(texto: string): void {
+        this._texto.set(texto);
         this.seleccionada.set(null);
-        this.recurso.reload();
+        this.busquedas.next(texto);
     }
 
-}    
+    // vuelve a pedir las clases con el mismo texto de antes, por ejemplo despues de crear, editar o borrar
+    recargar(): void {
+        this.seleccionada.set(null);
+        this.busquedas.next(this.busquedas.value);
+    }
+
+}
+
+// lo que sale del tubo cada vez: si esta cargando, si hubo error y la lista de clases
+interface Resultado {
+    cargando: boolean;
+    error: string | null;
+    clases: Clase[];
+}

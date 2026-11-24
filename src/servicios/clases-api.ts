@@ -4,7 +4,7 @@ import { map } from 'rxjs';
 import { Clase, ClaseConHorarios, ClaseNueva, Sobre } from '../app/modelos/clase';
 import { API_URL } from '../config';
 
-// este servicio es para escribir en la api (crear, editar y borrar). para leer el catalogo esta el httpResource de catalogo.ts
+// este servicio habla con la api: listar, crear, editar y borrar clases
 // todos regresan { data, meta } y con map me quedo solo con data
 @Service()
 export class ClasesApi {
@@ -29,5 +29,12 @@ export class ClasesApi {
     // DELETE /clases/2: borra la clase
     eliminar(id: number) {
         return this.http.delete<Sobre<Clase>>(`${API_URL}/clases/${id}`).pipe(map((r) => r.data));
+    }
+
+    // GET /clases?q=yoga: las clases que tienen ese texto en el nombre
+    // si q viene vacio no se manda el ?q= y regresa todas
+    listar(q = '') {
+        const params = q ? { q } : undefined;
+        return this.http.get<Sobre<Clase[]>>(`${API_URL}/clases`, { params }).pipe(map((r) => r.data));
     }
 }

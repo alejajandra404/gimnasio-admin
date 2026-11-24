@@ -214,3 +214,36 @@ La guarda de salida solo funciona cuando me muevo con el router de Angular (el �
 
 Porque el router revisa las rutas en orden y `clases/:id` le queda a cualquier cosa que venga después de `clases/`, incluida la palabra «nueva». Lo probé poniendo la ruta del detalle arriba: al darle «+ Nueva clase» me abrió la página de detalle en lugar del formulario, pidió `GET /clases/NaN` (porque tomó «nueva» como si fuera el id) y el servidor respondió 400 con «Validation failed (numeric string is expected)». Con `clases/nueva` arriba, esa dirección exacta se encuentra primero y ya no se confunde con un id.
 
+# Práctica 23 – El panel del gimnasio: el buscador con RxJS
+
+## Ejercicio 1: el tubo de búsqueda
+
+### ¿Qué diferencia hay entre un signal y un Observable?
+
+Un signal siempre tiene un valor guardado y lo puedo leer cuando quiera con `()`, por ejemplo `cargando()`. Un Observable no guarda nada y para recibirlos me tengo que suscribir. 
+
+## Ejercicio 2: la caja de búsqueda
+
+Al escribir «yoga» de corrido sale una sola petición, `clases?q=yoga`, gracias al `debounceTime`:
+
+![Búsqueda con una sola petición](evidencias/practica-23/20-busqueda-una-peticion.png)
+
+Con `RETARDO_MS` en el backend, si escribo otra letra mientras la petición anterior no ha regresado, esa petición sale como «(canceled)» y solo la última llega con 200:
+
+![Peticiones canceladas](evidencias/practica-23/21-peticiones-canceladas.png)
+
+Cuando ninguna clase coincide sale el mensaje de que no hay clases:
+
+![Mensaje sin resultados](evidencias/practica-23/22-mensaje-sin-resultados.png)
+
+Si muevo el tubo del buscador del constructor a `ngOnInit()`, sale el error NG0203, porque `takeUntilDestroyed()` solo se puede usar en el constructor:
+
+![Error NG0203](evidencias/practica-23/23-error-ng0203.png)
+
+### ¿Qué problema evita switchMap y qué pasaría con mergeMap?
+
+`switchMap` evita que una respuesta vieja tape a una nueva. Cuando llega un texto nuevo, cancela la petición anterior que todavía no regresaba y se queda solo con la última, como se ve en la captura de las canceladas. Con `mergeMap` no se cancela nada y todas las peticiones siguen vivas y cada respuesta se pinta cuando llega. 
+
+### ¿Qué pasa si se quita catchError y la API se apaga?
+
+Lo probé, quité el `catchError`, apagué el backend y escribí «yoga». Ya no salió el aviso rojo de error, la página se quedó en «buscando...» con los esqueletos grises, y en la consola salieron varios errores `HttpErrorResponse` con status 0. O sea, el error ya no se convierte en un mensaje para la pantalla, sino que truena. 

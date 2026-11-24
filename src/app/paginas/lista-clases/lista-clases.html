@@ -27,6 +27,14 @@
   </div>
 </section>
 
+<!-- la caja de busqueda. [formControl] la conecta con busqueda de lista-clases.ts -->
+<div class="buscador">
+  <input type="search" [formControl]="busqueda" placeholder="Buscar por nombre: yoga, box">
+  <span class="buscador__estado">
+    @if (catalogo.cargando()) { buscando... }
+  </span>
+</div>
+
 <app-filtro-categoria></app-filtro-categoria>
 
 <!-- tres estados: si fallo la api sale el error, si todavia esta cargando salen los esqueletos, y si ya llego sale el tablero -->
